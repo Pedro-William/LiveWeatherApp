@@ -1,6 +1,13 @@
+import { useState } from 'react'
 import sunny from '../assets/images/sunny.png'
 
 const WheatherApp = () => {
+    const [location,setLocation] = useState('')
+
+    const handleInputChanges = (e) => {
+        setLocation(e.target.value)
+      }
+
   return (
     <div className="container">
       <div className="weather-app">
@@ -14,6 +21,8 @@ const WheatherApp = () => {
             <input
               type="text"
               placeholder="Enter Location"
+              value={location}
+              onChange={handleInputChanges}
             />
             <i className="fa-solid fa-magnifying-glass"></i>
           </div>
