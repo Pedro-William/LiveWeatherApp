@@ -68,6 +68,7 @@ const WheatherApp = () => {
     const [location,setLocation] = useState('')
     const [data,setData] = useState(null)
     const [loading,setLoading] = useState(false)
+    const [error,setError] = useState('')
 
     const weatherImages = {
       sunny,
@@ -90,16 +91,19 @@ const WheatherApp = () => {
         const normalizedCity = city.trim()
 
         if (!normalizedCity) {
+          setError('Enter a city name')
           return
         }
 
         try {
           setLoading(true)
+          setError('')
 
           const coordinates = await getCoordinates(normalizedCity)
 
           if (!coordinates) {
-            console.log('City not found')
+            setError('City not found')
+            setData(null)
             return
           }
 
@@ -117,8 +121,12 @@ const WheatherApp = () => {
             weatherCode: currentWeather.weather_code,
             time: currentWeather.time
           })
-        } catch (error) {
-          console.error(error)
+
+          setLocation('')
+        } catch (err) {
+          console.error(err)
+          setError('Unable to load weather data')
+          setData(null)
         } finally {
           setLoading(false)
         }
@@ -164,6 +172,8 @@ const WheatherApp = () => {
             src={loadingGif}
             alt="Loading"
           />
+        ) : error ? (
+          <div className="not-found">{error}</div>
         ) : data && (
           <>
             <div className="weather">
