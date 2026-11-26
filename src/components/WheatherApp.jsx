@@ -1,6 +1,52 @@
 import { useState } from 'react'
 import sunny from '../assets/images/sunny.png'
 
+const getCoordinates = async (city) => {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`
+
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch coordinates')
+  }
+
+  const result = await response.json()
+
+  if (!result.results || result.results.length === 0) {
+    return null
+  }
+
+  const place = result.results[0]
+
+  return {
+    name: place.name,
+    country: place.country,
+    latitude: place.latitude,
+    longitude: place.longitude
+  }
+}
+
+const getWeather = async (latitude, longitude) => {
+  const currentFields = [
+    'temperature_2m',
+    'relative_humidity_2m',
+    'wind_speed_10m',
+    'weather_code'
+  ].join(',')
+
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=${currentFields}&timezone=auto`
+
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch weather data')
+  }
+
+  const result = await response.json()
+
+  return result.current
+}
+
 const WheatherApp = () => {
     const [location,setLocation] = useState('')
     const [data,setData] = useState(null)
@@ -15,8 +61,38 @@ const WheatherApp = () => {
         }
       }
 
-      const search = (city) => {
-        console.log('Searching for:', city)
+      const search = async (city) => {
+        const normalizedCity = city.trim()
+
+        if (!normalizedCity) {
+          return
+        }
+
+        try {
+          const coordinates = await getCoordinates(normalizedCity)
+
+          if (!coordinates) {
+            console.log('City not found')
+            return
+          }
+
+          const currentWeather = await getWeather(
+            coordinates.latitude,
+            coordinates.longitude
+          )
+
+          setData({
+            city: coordinates.name,
+            country: coordinates.country,
+            temperature: currentWeather.temperature_2m,
+            humidity: currentWeather.relative_humidity_2m,
+            windSpeed: currentWeather.wind_speed_10m,
+            weatherCode: currentWeather.weather_code,
+            time: currentWeather.time
+          })
+        } catch (error) {
+          console.error(error)
+        }
       }
 
   return (
