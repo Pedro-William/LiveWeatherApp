@@ -3,6 +3,7 @@ import sunny from '../assets/images/sunny.png'
 
 const WheatherApp = () => {
     const [location,setLocation] = useState('')
+    const [data,setData] = useState(null)
 
     const handleInputChanges = (e) => {
         setLocation(e.target.value)
@@ -12,6 +13,10 @@ const WheatherApp = () => {
         if (e.key === 'Enter') {
           search(location)
         }
+      }
+
+      const search = (city) => {
+        console.log('Searching for:', city)
       }
 
   return (
@@ -31,7 +36,10 @@ const WheatherApp = () => {
               onChange={handleInputChanges}
               onKeyDown={handleKeyDown}
             />
-            <i className="fa-solid fa-magnifying-glass"></i>
+            <i
+              className="fa-solid fa-magnifying-glass"
+              onClick={() => search(location)}
+            ></i>
           </div>
         </div>
 
