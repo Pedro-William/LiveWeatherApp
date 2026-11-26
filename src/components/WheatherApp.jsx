@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import SearchBar from './SearchBar'
+import WeatherCard from './WeatherCard'
 import loadingGif from '../assets/images/loading.gif'
 import { getWeatherInfo } from '../utils/weatherCode'
-import { formatDate } from '../utils/formatDate'
 import { getCoordinates, getCurrentWeather } from '../services/weatherApi'
 import { weatherImages, backgroundImages } from '../constants/weatherTheme'
 
@@ -107,22 +107,11 @@ const WheatherApp = () => {
           <div className="not-found">{error}</div>
         ) : data && (
           <>
-            <div className="weather">
-              <img
-                src={weatherImage}
-                alt={weatherInfo?.description || 'Weather'}
-              />
-              <div className="weather-type">
-                {weatherInfo ? weatherInfo.description : '--'}
-              </div>
-              <div className="temp">
-                {`${Math.round(data.temperature)}°`}
-              </div>
-            </div>
-
-            <div className="weather-date">
-              <p>{formatDate(data.time)}</p>
-            </div>
+            <WeatherCard
+              data={data}
+              weatherInfo={weatherInfo}
+              weatherImage={weatherImage}
+            />
 
             <div className="weather-data">
               <div className="humidity">
