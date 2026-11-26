@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import sunny from '../assets/images/sunny.png'
+import cloudy from '../assets/images/cloudy.png'
+import rainy from '../assets/images/rainy.png'
+import snowy from '../assets/images/snowy.png'
 import { getWeatherInfo } from '../utils/weatherCode'
 
 const getCoordinates = async (city) => {
@@ -64,6 +67,13 @@ const WheatherApp = () => {
     const [location,setLocation] = useState('')
     const [data,setData] = useState(null)
 
+    const weatherImages = {
+      sunny,
+      cloudy,
+      rainy,
+      snowy
+    }
+
     const handleInputChanges = (e) => {
         setLocation(e.target.value)
       }
@@ -112,6 +122,10 @@ const WheatherApp = () => {
     ? getWeatherInfo(data.weatherCode)
     : null
 
+  const weatherImage = weatherInfo
+    ? weatherImages[weatherInfo.type]
+    : sunny
+
   return (
     <div className="container">
       <div className="weather-app">
@@ -141,7 +155,10 @@ const WheatherApp = () => {
         {data && (
           <>
             <div className="weather">
-              <img src={sunny} alt="Clear sky" />
+              <img
+                src={weatherImage}
+                alt={weatherInfo?.description || 'Weather'}
+              />
               <div className="weather-type">
                 {weatherInfo ? weatherInfo.description : '--'}
               </div>
