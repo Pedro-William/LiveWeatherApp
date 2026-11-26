@@ -1,16 +1,26 @@
 const GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1/search'
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast'
 
-export const getCoordinates = async (cityName) => {
-  const url = `${GEOCODING_URL}?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`
+const fetchJson = async (url) => {
+  let response
 
-  const response = await fetch(url)
+  try {
+    response = await fetch(url)
+  } catch {
+    throw new Error('Unable to load weather data')
+  }
 
   if (!response.ok) {
     throw new Error('Unable to load weather data')
   }
 
-  const coordinateData = await response.json()
+  return response.json()
+}
+
+export const getCoordinates = async (cityName) => {
+  const url = `${GEOCODING_URL}?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`
+
+  const coordinateData = await fetchJson(url)
 
   if (!coordinateData.results || coordinateData.results.length === 0) {
     throw new Error('City not found')
@@ -36,13 +46,7 @@ export const getCurrentWeather = async (latitude, longitude) => {
 
   const url = `${FORECAST_URL}?latitude=${latitude}&longitude=${longitude}&current=${currentFields}&timezone=auto`
 
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    throw new Error('Unable to load weather data')
-  }
-
-  const weatherData = await response.json()
+  const weatherData = await fetchJson(url)
 
   return weatherData.current
 }
