@@ -1,25 +1,15 @@
 import { useState } from 'react'
-import sunny from '../assets/images/sunny.png'
 import loadingGif from '../assets/images/loading.gif'
-import cloudy from '../assets/images/cloudy.png'
-import rainy from '../assets/images/rainy.png'
-import snowy from '../assets/images/snowy.png'
 import { getWeatherInfo } from '../utils/weatherCode'
 import { formatDate } from '../utils/formatDate'
 import { getCoordinates, getCurrentWeather } from '../services/weatherApi'
+import { weatherImages, backgroundImages } from '../constants/weatherTheme'
 
 const WheatherApp = () => {
     const [location,setLocation] = useState('')
     const [data,setData] = useState(null)
     const [loading,setLoading] = useState(false)
     const [error,setError] = useState('')
-
-    const weatherImages = {
-      sunny,
-      cloudy,
-      rainy,
-      snowy
-    }
 
     const handleInputChanges = (e) => {
         setLocation(e.target.value)
@@ -80,13 +70,24 @@ const WheatherApp = () => {
     ? getWeatherInfo(data.weatherCode)
     : null
 
-  const weatherImage = weatherInfo
-    ? weatherImages[weatherInfo.type]
-    : sunny
+  const weatherType = weatherInfo?.type || 'sunny'
+  const weatherImage = weatherImages[weatherType]
+  const backgroundImage = backgroundImages[weatherType]
 
   return (
-    <div className="container">
-      <div className="weather-app">
+    <div
+      className="container"
+      style={{ backgroundImage }}
+    >
+      <div
+        className="weather-app"
+        style={{
+          backgroundImage: backgroundImage.replace(
+            'to right',
+            'to top'
+          )
+        }}
+      >
         <div className="search">
           <div className="search-top">
             <i className="fa-solid fa-location-dot"></i>
