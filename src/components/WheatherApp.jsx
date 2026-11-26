@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import sunny from '../assets/images/sunny.png'
+import loadingGif from '../assets/images/loading.gif'
 import cloudy from '../assets/images/cloudy.png'
 import rainy from '../assets/images/rainy.png'
 import snowy from '../assets/images/snowy.png'
@@ -66,6 +67,7 @@ const formatDate = (dateTime) => {
 const WheatherApp = () => {
     const [location,setLocation] = useState('')
     const [data,setData] = useState(null)
+    const [loading,setLoading] = useState(false)
 
     const weatherImages = {
       sunny,
@@ -92,6 +94,8 @@ const WheatherApp = () => {
         }
 
         try {
+          setLoading(true)
+
           const coordinates = await getCoordinates(normalizedCity)
 
           if (!coordinates) {
@@ -115,6 +119,8 @@ const WheatherApp = () => {
           })
         } catch (error) {
           console.error(error)
+        } finally {
+          setLoading(false)
         }
       }
 
@@ -152,7 +158,13 @@ const WheatherApp = () => {
           </div>
         </div>
 
-        {data && (
+        {loading ? (
+          <img
+            className="loader"
+            src={loadingGif}
+            alt="Loading"
+          />
+        ) : data && (
           <>
             <div className="weather">
               <img
