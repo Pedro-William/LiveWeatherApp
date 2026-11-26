@@ -1,63 +1,122 @@
 import { useState } from 'react'
-import sunny from '../assets/images/sunny.png'
+import SearchBar from './SearchBar'
+import WeatherCard from './WeatherCard'
+import WeatherDetails from './WeatherDetails'
+import NotFound from './NotFound'
+import loadingGif from '../assets/images/loading.gif'
+import { getCoordinates, getCurrentWeather } from '../services/weatherApi'
+import { getWeatherInfo } from '../utils/weatherCode'
+import { weatherImages, backgroundImages } from '../constants/weatherTheme'
 
 const WheatherApp = () => {
-    const [location,setLocation] = useState('')
+  const [data, setData] = useState(null)
+  const [location, setLocation] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-    const handleInputChanges = (e) => {
-        setLocation(e.target.value)
+  const handleInputChanges = (event) => {
+    setLocation(event.target.value)
+  }
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      search(location)
+    }
+  }
+
+  const search = async (cityName) => {
+    const normalizedCity = cityName.trim()
+
+    if (!normalizedCity) {
+      setError('Enter a city name')
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError('')
+
+      const coordinates = await getCoordinates(normalizedCity)
+
+      if (!coordinates) {
+        setError('City not found')
+        setData(null)
+        return
       }
 
-      const handleKeyDown = (e) => {
-        if (e.key === 'Enter') {
-          search(location)
-        }
-      }
+      const currentWeather = await getCurrentWeather(
+        coordinates.latitude,
+        coordinates.longitude
+      )
+
+      setData({
+        city: coordinates.name,
+        country: coordinates.country,
+        temperature: currentWeather.temperature_2m,
+        humidity: currentWeather.relative_humidity_2m,
+        windSpeed: currentWeather.wind_speed_10m,
+        weatherCode: currentWeather.weather_code,
+        time: currentWeather.time
+      })
+
+      setLocation('')
+    } catch (err) {
+      console.error(err)
+      setError(err.message || 'Unable to load weather data')
+      setData(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const weatherInfo = data
+    ? getWeatherInfo(data.weatherCode)
+    : null
+
+  const weatherType = weatherInfo?.type || 'sunny'
+  const weatherImage = weatherImages[weatherType]
+  const backgroundImage = backgroundImages[weatherType]
 
   return (
-    <div className="container">
-      <div className="weather-app">
-        <div className="search">
-          <div className="search-top">
-            <i className="fa-solid fa-location-dot"></i>
-            <div className="location">London</div>
-          </div>
+    <div
+      className="container"
+      style={{ backgroundImage }}
+    >
+      <div
+        className="weather-app"
+        style={{
+          backgroundImage: backgroundImage.replace(
+            'to right',
+            'to top'
+          )
+        }}
+      >
+        <SearchBar
+          location={location}
+          handleInputChanges={handleInputChanges}
+          handleKeyDown={handleKeyDown}
+          search={search}
+          city={data?.city}
+        />
 
-          <div className="search-bar">
-            <input
-              type="text"
-              placeholder="Enter Location"
-              value={location}
-              onChange={handleInputChanges}
-              onKeyDown={handleKeyDown}
+        {loading ? (
+          <img
+            className="loader"
+            src={loadingGif}
+            alt="Loading"
+          />
+        ) : error ? (
+          <NotFound message={error} />
+        ) : data ? (
+          <>
+            <WeatherCard
+              data={data}
+              weatherInfo={weatherInfo}
+              weatherImage={weatherImage}
             />
-            <i className="fa-solid fa-magnifying-glass"></i>
-          </div>
-        </div>
-
-        <div className="weather">
-          <img src={sunny} alt="Clear sky" />
-          <div className="weather-type">Clear</div>
-          <div className="temp">28°</div>
-        </div>
-
-        <div className="weather-date">
-          <p>Sat, 15 Ago</p>
-        </div>
-
-        <div className="weather-data">
-          <div className="humidity">
-            <div className="data-name">Humidity</div>
-            <i className="fa-solid fa-droplet"></i>
-            <div className="data">35%</div>
-          </div>
-
-          <div className="wind">
-            <div className="data-name">Wind</div>
-            <i className="fa-solid fa-wind"></i>
-            <div className="data">3 km/h</div>
-          </div>
-        </div>
+            <WeatherDetails data={data} />
+          </>
+        ) : null}
       </div>
     </div>
   )
