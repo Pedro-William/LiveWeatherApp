@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import sunny from '../assets/images/sunny.png'
+import { getWeatherInfo } from '../utils/weatherCode'
 
 const getCoordinates = async (city) => {
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`
@@ -45,6 +46,18 @@ const getWeather = async (latitude, longitude) => {
   const result = await response.json()
 
   return result.current
+}
+
+const formatDate = (dateTime) => {
+  if (!dateTime) {
+    return ''
+  }
+  const date = new Date(dateTime)
+  return new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short'
+  }).format(date)
 }
 
 const WheatherApp = () => {
@@ -95,13 +108,19 @@ const WheatherApp = () => {
         }
       }
 
+  const weatherInfo = data
+    ? getWeatherInfo(data.weatherCode)
+    : null
+
   return (
     <div className="container">
       <div className="weather-app">
         <div className="search">
           <div className="search-top">
             <i className="fa-solid fa-location-dot"></i>
-            <div className="location">London</div>
+            <div className="location">
+              {data ? data.city : 'Search a city'}
+            </div>
           </div>
 
           <div className="search-bar">
@@ -119,29 +138,37 @@ const WheatherApp = () => {
           </div>
         </div>
 
-        <div className="weather">
-          <img src={sunny} alt="Clear sky" />
-          <div className="weather-type">Clear</div>
-          <div className="temp">28°</div>
-        </div>
+        {data && (
+          <>
+            <div className="weather">
+              <img src={sunny} alt="Clear sky" />
+              <div className="weather-type">
+                {weatherInfo ? weatherInfo.description : '--'}
+              </div>
+              <div className="temp">
+                {`${Math.round(data.temperature)}°`}
+              </div>
+            </div>
 
-        <div className="weather-date">
-          <p>Sat, 15 Ago</p>
-        </div>
+            <div className="weather-date">
+              <p>{formatDate(data.time)}</p>
+            </div>
 
-        <div className="weather-data">
-          <div className="humidity">
-            <div className="data-name">Humidity</div>
-            <i className="fa-solid fa-droplet"></i>
-            <div className="data">35%</div>
-          </div>
+            <div className="weather-data">
+              <div className="humidity">
+                <div className="data-name">Humidity</div>
+                <i className="fa-solid fa-droplet"></i>
+                <div className="data">{`${data.humidity}%`}</div>
+              </div>
 
-          <div className="wind">
-            <div className="data-name">Wind</div>
-            <i className="fa-solid fa-wind"></i>
-            <div className="data">3 km/h</div>
-          </div>
-        </div>
+              <div className="wind">
+                <div className="data-name">Wind</div>
+                <i className="fa-solid fa-wind"></i>
+                <div className="data">{`${data.windSpeed} km/h`}</div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
