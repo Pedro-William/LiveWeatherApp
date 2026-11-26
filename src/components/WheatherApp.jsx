@@ -5,6 +5,7 @@ import cloudy from '../assets/images/cloudy.png'
 import rainy from '../assets/images/rainy.png'
 import snowy from '../assets/images/snowy.png'
 import { getWeatherInfo } from '../utils/weatherCode'
+import { formatDate } from '../utils/formatDate'
 
 const getCoordinates = async (city) => {
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`
@@ -50,18 +51,6 @@ const getWeather = async (latitude, longitude) => {
   const result = await response.json()
 
   return result.current
-}
-
-const formatDate = (dateTime) => {
-  if (!dateTime) {
-    return ''
-  }
-  const date = new Date(dateTime)
-  return new Intl.DateTimeFormat('pt-BR', {
-    weekday: 'short',
-    day: '2-digit',
-    month: 'short'
-  }).format(date)
 }
 
 const WheatherApp = () => {
