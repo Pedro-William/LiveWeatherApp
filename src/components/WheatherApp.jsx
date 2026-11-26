@@ -2,6 +2,7 @@ import { useState } from 'react'
 import SearchBar from './SearchBar'
 import WeatherCard from './WeatherCard'
 import WeatherDetails from './WeatherDetails'
+import NotFound from './NotFound'
 import loadingGif from '../assets/images/loading.gif'
 import { getWeatherInfo } from '../utils/weatherCode'
 import { getCoordinates, getCurrentWeather } from '../services/weatherApi'
@@ -105,7 +106,7 @@ const WheatherApp = () => {
             alt="Loading"
           />
         ) : error ? (
-          <div className="not-found">{error}</div>
+          <NotFound message={error} />
         ) : data && (
           <>
             <WeatherCard
